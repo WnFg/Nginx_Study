@@ -42,37 +42,24 @@ Nginx为了实现对uri的重写，以及有条件的使部分配置生效等功
 
 从以上内容可以看到，rewrite模块定义的指令相比于其它模块的指令更具有被执行的感觉\(毕竟要被解释器执行\)，那么它是如何有选择的使一些配置生效呢？看下面的例子：
 
+```
 location / {
-
 root html;
-
 echo $test;
-
-if  \($uri ~ .\*jpg$\) {
-
+if  ($uri ~ .*jpg$) {
 root jpg;
-
-set $test i\\_am\\_jpg;
-
+set $test i\_am\_jpg;
 break;
-
 }
-
-if  \($uri ~ .\*png$\) {
-
+if  ($uri ~ .*png$) {
 root png;
-
-set $test i\\_am\\_png;
-
+set $test i\_am\_png;
 break;
-
 }
-
-set $test i\_am\_default
-
-}
-
-            例1
+set $test i_am_default
+}       
+         例1
+```
 
 上面的Location中，root指令将被http\_core模块解析，echo指令被http\_echo模块解析，其余指令被rewrite模块解析，大致形成如图3的location级别的配置结构，对应图4红框内的结构
 
