@@ -1,5 +1,3 @@
-
-
 ## 1. rewrite模块简介
 
 ngx\_http\_rewrite\_module属于Http模块，常用功能是通过正则匹配来修改请求的URI或有选择的使某些配置生效。
@@ -66,7 +64,7 @@ root png;
 
 set $test i\\_am\\_png;
 
-break;     
+break;
 
 }
 
@@ -82,31 +80,20 @@ set $test i\_am\_default
 
 例1中的rewrite指令，在被解析后，大致形成如下伪代码：
 
+```
 start
-
-test $uri ~ .\*jpg
-
-check against zero
-
-         replace location\\_configure
-
-         set  $test  i\\_am\\_jpg
-
-         exit rewrite\\_phase
-
-test $uri ~ .\*png
-
-check against zero
-
-          replace location\_configure
-
-          set  $test  i\_am\_jpg
-
-          exit rewrite\_phase
-
-set $test i\_am\_default
-
+test $uri ~ .*jpg
+check against zero     
+     replace location_configure
+     set  $test  i_am_jpg
+     exit rewrite_phase
+test $uri ~ .*png
+     replace location_configure
+     set $test i_am_jpg
+     exit rewrite_phase
+set $test i_am_default
 end
+```
 
 结合图3及上述伪代码，可以看出，当nginx启动后，配置文件解析如图3所示，而上述中间代码则存储于rewrite模块生成的结构体，特别的，在rewrite解析if指令时，会继承上一级的Location配置，并根据if大括号中的配置内容生成新的location配置。例如，上一级的root为html，而if \($uri ~ .\*jpg\) 对应的location结构体中root为jpg。
 
