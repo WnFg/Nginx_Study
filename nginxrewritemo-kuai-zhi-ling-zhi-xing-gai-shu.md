@@ -1,6 +1,6 @@
-## ![](http://wiki.baidu.com/plugins/servlet/confluence/placeholder/macro?definition=e3RvY30&locale=zh_CN&version=2)
 
-## 1. rewrite模块简介
+
+## 1. rewrite模块简介
 
 ngx\_http\_rewrite\_module属于Http模块，常用功能是通过正则匹配来修改请求的URI或有选择的使某些配置生效。
 
@@ -14,21 +14,19 @@ ngx\_http\_rewrite\_module属于Http模块，常用功能是通过正则匹配�
 
 指令的执行顺序：
 
-The [break](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html#break), [if](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html#if), [return](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html#return), [rewrite](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html#rewrite), and [set](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html#set) directives are processed in the following order:
+The [break](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html#break), [if](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html#if), [return](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html#return), [rewrite](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html#rewrite), and [set](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html#set) directives are processed in the following order:
 
-* the directives of this module specified on the [server](http://nginx.org/en/docs/http/ngx_http_core_module.html#server) level are executed sequentially;
+* the directives of this module specified on the [server](http://nginx.org/en/docs/http/ngx_http_core_module.html#server) level are executed sequentially;
 * repeatedly:
-  * a [location](http://nginx.org/en/docs/http/ngx_http_core_module.html#location) is searched based on a request URI;
+  * a [location](http://nginx.org/en/docs/http/ngx_http_core_module.html#location) is searched based on a request URI;
   * the directives of this module specified inside the found location are executed sequentially;
-  * the loop is repeated if a request URI was [rewritten](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html#rewrite), but not more than [10 times](http://nginx.org/en/docs/http/ngx_http_core_module.html#internal).
+  * the loop is repeated if a request URI was [rewritten](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html#rewrite), but not more than [10 times](http://nginx.org/en/docs/http/ngx_http_core_module.html#internal).
 
 ## 2. nginx配置文件解析简介
 
 很多时候，nginx的配置文件被看作是特定语言定义的一个脚本，但是这种视角会给人一种错觉——当一个请求被Nginx处理时，指令是按配置文件中的顺序作用于该请求。实质上，配置文件中的指令在Nginx启动阶段，将被其所属的模块解析，并组合成一个特定的结构体，并在处理请求时被使用。例如，当配置文件解析完成后，所有的http模块根据配置文件内容将生成如下结构：
 
-![](http://wiki.baidu.com/download/attachments/481109760/image2018-3-26%2022%3A21%3A12.png?version=1&modificationDate=1522074073000&api=v2)
-
-                                                 图1
+![](/assets/QWE.png)
 
 \(以下内容仅讨论nginx中的http模块\)
 
@@ -38,9 +36,7 @@ The [break](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html#break),�
 
 ## 3. rewrite模块是如何工作的
 
-![](http://wiki.baidu.com/download/attachments/481109760/image2018-3-26%2022%3A58%3A32.png?version=1&modificationDate=1522076312000&api=v2)
-
-                                                            图2
+![](/assets/rewrite——图2.png)
 
 Nginx为了实现对uri的重写，以及有条件的使部分配置生效等功能，需要引入一些流程控制结构\(例如If\)，这就是rewrite模块做的事了。如图2所示，rewrite模块在NGX\_HTTP\_SERVER\_REWRITE\_PHASE和NGX\_HTTP\_REWRITE\_PHASE两个阶段起作用，作用的方法简单来说就是注册一个处理函数到Nginx框架中，当框架进行到某一阶段时，按顺序调用所有模块注册的处理函数。
 
@@ -48,29 +44,29 @@ Nginx为了实现对uri的重写，以及有条件的使部分配置生效等功
 
 从以上内容可以看到，rewrite模块定义的指令相比于其它模块的指令更具有被执行的感觉\(毕竟要被解释器执行\)，那么它是如何有选择的使一些配置生效呢？看下面的例子：
 
-location / {
+location / {
 
 root html;
 
 echo $test;
 
-if  \($uri ~ .\*jpg$\) {
+if  \($uri ~ .\*jpg$\) {
 
-          root jpg;
+root jpg;
 
-          set $test i\_am\_jpg;
+set $test i\\_am\\_jpg;
 
-          break;
+break;
 
 }
 
-if  \($uri ~ .\*png$\) {
+if  \($uri ~ .\*png$\) {
 
-          root png;
+root png;
 
-          set $test i\_am\_png;
+set $test i\\_am\\_png;
 
-          break;
+break;     
 
 }
 
@@ -78,17 +74,11 @@ set $test i\_am\_default
 
 }
 
-           例1
+            例1
 
 上面的Location中，root指令将被http\_core模块解析，echo指令被http\_echo模块解析，其余指令被rewrite模块解析，大致形成如图3的location级别的配置结构，对应图4红框内的结构
 
-![](http://wiki.baidu.com/download/attachments/481109760/image2018-3-27%2012%3A37%3A6.png?version=1&modificationDate=1522125426000&api=v2)
-
-                                                              图3
-
-![](http://wiki.baidu.com/download/attachments/481109760/image2018-3-27%2012%3A39%3A13.png?version=1&modificationDate=1522125553000&api=v2)
-
-                                                      图4
+![](/assets/XXW.png)
 
 例1中的rewrite指令，在被解析后，大致形成如下伪代码：
 
@@ -98,21 +88,21 @@ test $uri ~ .\*jpg
 
 check against zero
 
-        replace location\_configure
+         replace location\\_configure
 
-        set  $test  i\_am\_jpg
+         set  $test  i\\_am\\_jpg
 
-        exit rewrite\_phase
+         exit rewrite\\_phase
 
 test $uri ~ .\*png
 
 check against zero
 
-        replace location\_configure
+          replace location\_configure
 
-        set  $test  i\_am\_jpg
+          set  $test  i\_am\_jpg
 
-        exit rewrite\_phase
+          exit rewrite\_phase
 
 set $test i\_am\_default
 
@@ -130,16 +120,16 @@ end
 
 ## 4. rewrite模块其它指令
 
-return 就比较简单了，语法：return **code \[text\];    **例如return 200 "ok"，向客户端返回响应，响应码为200，内容为ok。
+return 就比较简单了，语法：return **code \[text\];    **例如return 200 "ok"，向客户端返回响应，响应码为200，内容为ok。
 
-rewrite 指令用来重写uri，语法：rewrite_`regexreplacement`_ \[_`flag`_\];
+rewrite 指令用来重写uri，语法：rewrite`regexreplacement` \[`flag`\];
 
 当uri匹配到regex时，替换为replacement，其中flag是可选的，flag有以下选择：
 
-* last          终止后续rewrite指令的执行，并回到NGX\_HTTP\_CONFIG\_PHASE阶段，重新根据uri匹配location，最多循环10次
-* break       终止后续rewrite指令的执行
-* redirect    http 302，重定向
-* permanent   http 301
+* last          终止后续rewrite指令的执行，并回到NGX\_HTTP\_CONFIG\_PHASE阶段，重新根据uri匹配location，最多循环10次
+* break       终止后续rewrite指令的执行
+* redirect    http 302，重定向
+* permanent   http 301
 
 特别的，若replacement以http,https或$scheme开头，则直接向客户端发送重定向响应。当replacement有参数时，uri重写前的参数将后缀到replacement之后，如果不想这样，可以在replacement最后放一个问号——'?'，例如：rewrite ^/users/\(.\*\)$ /show?user=$1? last;
 
@@ -147,10 +137,7 @@ rewrite 指令用来重写uri，语法：rewrite_`regexreplacement`_ \[_`flag`_
 
 到这里，可以知道，若想要了解一个nginx配置项的作用，需要首先知道其可以出现的上下文\(context\)，语法，及大致作用，这个可以从nginx官方文档中快速找到，例如
 
-![](http://wiki.baidu.com/download/thumbnails/481109760/image2018-3-27%2020%3A3%3A39.png?version=1&modificationDate=1522152219000&api=v2)
+![](/assets/XXX.png)
 
 但若想详细了解该配置项的作用规则，则需要了解它是哪个模块定义的，该模块如何介入Nginx的处理框架中，该模块属于哪一类型的模块，例如http模块，过滤模块，事件处理模块等，每种类型的模块都有Nginx框架规定的一套接口，用来完成不同的功能，不过我们接触最多的应该是http模块。
-
-  
-
 
