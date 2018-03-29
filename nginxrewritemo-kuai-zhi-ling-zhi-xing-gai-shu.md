@@ -48,12 +48,12 @@ root html;
 echo $test;
 if  ($uri ~ .*jpg$) {
 root jpg;
-set $test i\_am\_jpg;
+set $test i_am_jpg;
 break;
 }
 if  ($uri ~ .*png$) {
 root png;
-set $test i\_am\_png;
+set $test i_am_png;
 break;
 }
 set $test i_am_default
