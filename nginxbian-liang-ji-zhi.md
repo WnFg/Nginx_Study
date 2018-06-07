@@ -200,6 +200,7 @@ typedef void (*ngx_http_set_variable_pt) (ngx_http_request_t *r,
 typedef ngx_int_t (*ngx_http_get_variable_pt) (ngx_http_request_t *r,
     ngx_http_variable_value_t *v, uintptr_t data);
 ```
+get和set方法是一对相反的作用，get一般是从请求r中得到内容放入v中，set一般是将v的内容放入r中，其中data是该变量value中的data。
 
 
 
