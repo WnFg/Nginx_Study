@@ -202,5 +202,39 @@ typedef ngx_int_t (*ngx_http_get_variable_pt) (ngx_http_request_t *r,
 ```
 get和set方法是一对相反的作用，get一般是从请求r中得到内容放入v中，set一般是将v的内容放入r中，其中data是该变量value中的data。
 
+- 注册一个变量
+```cpp
+ngx_http_variable_t *
+ngx_http_add_variable(ngx_conf_t *cf, ngx_str_t *name, ngx_uint_t flags)
+```
+其中cf描述了当前解析的配置，cf->ctx则是当前解析到的http上下文(http{} 或 server {} 或 location{})。name是变量名，flags对应了上述http_variable_s的flags，其值是由下面的几个属性组合而成:
+
+```cpp
+#define NGX_HTTP_VAR_CHANGEABLE   1
+#define NGX_HTTP_VAR_NOCACHEABLE  2
+#define NGX_HTTP_VAR_INDEXED      4
+#define NGX_HTTP_VAR_NOHASH       8
+NGX_HTTP_VAR_CHANGEABLE
+NGX_HTTP_VAR_NOCACHEABLE表示这个变量每次都要去取值，而不是直接返回上次cache的值(配合对应的接口).
+NGX_HTTP_VAR_INDEXED表示这个变量是用索引读取的.
+NGX_HTTP_VAR_NOHASH表示这个变量不需要被hash.
+```
+其中indexed标识，用户一般不能显式的使用，利用set指令定义的变量总是indexed的。nocacheable标识则表明了，indexed类型的变量不用缓存(只有indexed的变量会有缓存，不需要每次都调用get方法获取变量值)。
+
+- 注册一个可被索引的变量
+```cpp
+ngx_int_t
+ngx_http_get_variable_index(ngx_conf_t *cf, ngx_str_t *name)
+```
+在使用上述的add函数注册一个变量后，如果要使变量变为可被索引的(indexed)，需要执行ngx_http_get_variable_index，获得或生成一个该变量的索引。
+
+- 获取变量值
+```cpp
+ngx_http_variable_value_t *
+ngx_http_get_variable(ngx_http_request_t *r, ngx_str_t *name, ngx_uint_t key)
+```
+    - 对于不可索引的变量，该函数每次调用get方法获得变量值
+    - 对于可索引变量，若该变量是nocache的则每次用get方法获取，否则使用缓存在
+    r->variable数组中的值。
 
 
