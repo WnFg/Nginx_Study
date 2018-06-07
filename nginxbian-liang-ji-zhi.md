@@ -234,8 +234,7 @@ ngx_http_variable_value_t *
 ngx_http_get_variable(ngx_http_request_t *r, ngx_str_t *name, ngx_uint_t key)
 ```
     - 对于不可索引的变量，该函数每次调用get方法获得变量值
-    - 对于可索引变量，若该变量是nocache的则每次用get方法获取，否则使用缓存在
-    r->variable数组中的值。
+    - 对于可索引变量，若该变量是nocache的则每次用get方法获取，否则使用缓存在r->variable数组中的值。
     
 - 设置变量值
 变量的set方法，会在set指令中触发。简单来说，如果该变量没有set方法时，使用set指令会给出一个默认的set方法，否则使用变量自定义的set方法，对变量自定义的get方法同理。**注意：**set方法会在rewrite阶段被执行(解析变量值时，时机可看rewrite模块运作机制)。
